@@ -1,3 +1,5 @@
+'use strict';
+
 var cake = {
   name: "German Chocolate Cake",
   ingredients: ["eggs", "flour", "oil", "chocolate", "sugar", "butter"],
@@ -8,8 +10,8 @@ var cake = {
   decorate: function(updateFunction) {
     var status = "Decorating with " + this.topping + ". Ready to eat soon!"
     updateFunction(status)
-    setTimeout(function() {
-      updateFunction(serve.apply(this, "Happy Eating!", this.customer))
+    setTimeout( () => {
+      updateFunction(serve.apply(this, ["Happy Eating!", this.customer]))
     }, 2000)
   }
 }
@@ -22,15 +24,19 @@ var pie = {
   bakeTime: "75 minutes",
   customer: "Tammy"
 }
+pie.decorate = cake.decorate.bind(pie)
 
 function makeCake() {
-  var updateCakeStatus;
-  mix(updateCakeStatus)
+  var updateCakeStatus = updateStatus.bind(document.getElementById("cake"))
+  var mixCake = mix.bind(cake)
+  mixCake(updateCakeStatus)
 }
 
 function makePie() {
-  var updatePieStatus;
-  mix(updatePieStatus)
+  var updatePieStatus = updateStatus.bind(document.getElementById("pie"))
+  pie.decorate = cake.decorate.bind(pie)
+  var mixPie = mix.bind(pie)
+  mixPie(updatePieStatus)
 }
 
 function updateStatus(statusText) {
@@ -39,22 +45,24 @@ function updateStatus(statusText) {
 
 function bake(updateFunction) {
   var status = "Baking at " + this.bakeTemp + " for " + this.bakeTime
-  setTimeout(function() {
-    cool(updateFunction)
+  var coolThis = cool.bind(this)
+  setTimeout( () => {
+    coolThis(updateFunction)
   }, 2000)
 }
 
 function mix(updateFunction) {
   var status = "Mixing " + this.ingredients.join(", ")
-  setTimeout(function() {
-    bake(updateFunction)
+  var bakeThis = bake.bind(this)
+  setTimeout( () => {
+    bakeThis(updateFunction)
   }, 2000)
   updateFunction(status)
 }
 
 function cool(updateFunction) {
   var status = "It has to cool! Hands off!"
-  setTimeout(function() {
+  setTimeout( () => {
     this.decorate(updateFunction)
   }, 2000)
 }
@@ -62,6 +70,12 @@ function cool(updateFunction) {
 function makeDessert() {
   //add code here to decide which make... function to call
   //based on which link was clicked
+  if (this === document.getElementsByClassName("js-make")[0]) {
+    makeCake()
+  }
+  if (this === document.getElementsByClassName("js-make")[1]) {
+    makePie()
+  }
 }
 
 function serve(message, customer) {
